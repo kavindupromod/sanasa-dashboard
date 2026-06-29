@@ -3,6 +3,7 @@
 <head>
     <meta charset="utf-8"/>
     <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <title>PastDue Ledger | Data Comparison & Analytics</title>
     <!-- Tailwind CSS with Forms and Container Queries plugins -->
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
@@ -331,6 +332,41 @@
                     </div>
                 </div>
 
+                <!-- Charts and Advanced Metrics Section -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-gutter">
+                    <!-- Chart Card 1: Trajectory Breakdown & Advanced Metrics -->
+                    <div class="bg-surface-container-lowest p-6 rounded-xl border border-outline-variant shadow-sm flex flex-col justify-between">
+                        <h3 class="font-bold text-xs text-outline uppercase tracking-wider mb-4">Payment Trajectory & Recovery Metrics</h3>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 items-center">
+                            <!-- Donut Chart Canvas -->
+                            <div class="relative w-full max-w-[160px] aspect-square mx-auto flex items-center justify-center">
+                                <canvas id="chart-trajectory"></canvas>
+                            </div>
+                            <!-- Advanced Metrics List -->
+                            <div class="space-y-4">
+                                <div class="p-3 bg-teal-50 border border-teal-100 rounded-lg">
+                                    <p class="text-[10px] font-bold text-teal-800 uppercase tracking-wider">Arrears Reduction Rate</p>
+                                    <p id="metric-recovery-rate" class="text-xl font-black text-teal-900 mt-1">0.0%</p>
+                                    <p class="text-[9px] text-teal-700 mt-0.5">Members paying off or clearing arrears</p>
+                                </div>
+                                <div class="p-3 bg-rose-50 border border-rose-100 rounded-lg">
+                                    <p class="text-[10px] font-bold text-rose-800 uppercase tracking-wider">New Delinquency Risk</p>
+                                    <p id="metric-risk-rate" class="text-xl font-black text-rose-900 mt-1">0.0%</p>
+                                    <p class="text-[9px] text-rose-700 mt-0.5">New additions to past-due lists</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Chart Card 2: Arrears by Loan Type -->
+                    <div class="bg-surface-container-lowest p-6 rounded-xl border border-outline-variant shadow-sm flex flex-col justify-between">
+                        <h3 class="font-bold text-xs text-outline uppercase tracking-wider mb-4">Arrears Balance by Loan Type</h3>
+                        <div class="relative w-full h-[180px] flex items-center justify-center">
+                            <canvas id="chart-loan-types"></canvas>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Critical Rule Alerts (Evaluated dynamically per zone and rule) -->
                 <div id="critical-alert-box" class="bg-on-background text-white p-8 rounded-2xl shadow-xl flex flex-col md:flex-row items-center justify-between gap-8 relative overflow-hidden hidden">
                     <div class="absolute top-[-20%] left-[-5%] w-64 h-64 bg-primary rounded-full blur-[100px] opacity-20"></div>
@@ -442,6 +478,8 @@
         // Global variables
         let appData = null;
         let activeTab = 'sync';
+        let trajectoryChart = null;
+        let loanTypeChart = null;
         let selectedZone = 1;
         let tableFilterMode = 'ALL';
         let currentPage = 1;
@@ -798,6 +836,99 @@
             document.getElementById('count-cleared').textContent = `Cleared: ${cChanges}`;
             document.getElementById('count-decreased').textContent = `Decreased: ${dChanges}`;
             document.getElementById('count-increased').textContent = `Increased: ${iChanges}`;
+
+            // Advanced Metrics Computation
+            const totalChangesCount = zoneChanges.length;
+            const recoveryRate = totalChangesCount > 0 ? (((cChanges + dChanges) / totalChangesCount) * 100).toFixed(1) : '0.0';
+            const riskRate = totalChangesCount > 0 ? ((nChanges / totalChangesCount) * 100).toFixed(1) : '0.0';
+
+            document.getElementById('metric-recovery-rate').textContent = `${recoveryRate}%`;
+            document.getElementById('metric-risk-rate').textContent = `${riskRate}%`;
+
+            // Render Trajectory Donut Chart
+            if (trajectoryChart) {
+                trajectoryChart.destroy();
+            }
+            const trajCtx = document.getElementById('chart-trajectory').getContext('2d');
+            trajectoryChart = new Chart(trajCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['New PastDue', 'Cleared', 'Decreased', 'Increased', 'Unchanged'],
+                    datasets: [{
+                        data: [nChanges, cChanges, dChanges, iChanges, zoneChanges.filter(c => c.type === 'NO_CHANGE').length],
+                        backgroundColor: ['#f43f5e', '#10b981', '#0ea5e9', '#6366f1', '#cbd5e1'],
+                        borderWidth: 2,
+                        hoverOffset: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    cutout: '65%'
+                }
+            });
+
+            // Group arrears by loan type for horizontal bar chart
+            const arrearsByLoanType = {};
+            zoneViolations.forEach(r => {
+                const shortName = r.loanType.split('(')[0].trim();
+                arrearsByLoanType[shortName] = (arrearsByLoanType[shortName] || 0) + r.balance;
+            });
+
+            const sortedLoanTypes = Object.entries(arrearsByLoanType)
+                .sort((a, b) => b[1] - a[1])
+                .slice(0, 5);
+
+            const loanTypeLabels = sortedLoanTypes.map(item => item[0]);
+            const loanTypeData = sortedLoanTypes.map(item => item[1]);
+
+            if (loanTypeChart) {
+                loanTypeChart.destroy();
+            }
+            const ltCtx = document.getElementById('chart-loan-types').getContext('2d');
+            loanTypeChart = new Chart(ltCtx, {
+                type: 'bar',
+                data: {
+                    labels: loanTypeLabels,
+                    datasets: [{
+                        label: 'Total Arrears (LKR)',
+                        data: loanTypeData,
+                        backgroundColor: '#006b5f',
+                        borderRadius: 6,
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        x: {
+                            grid: { display: false },
+                            ticks: {
+                                callback: function(value) {
+                                    if (value >= 1e6) return 'LKR ' + (value / 1e6).toFixed(1) + 'M';
+                                    if (value >= 1e3) return 'LKR ' + (value / 1e3).toFixed(0) + 'k';
+                                    return 'LKR ' + value;
+                                },
+                                font: { size: 9 }
+                            }
+                        },
+                        y: {
+                            grid: { display: false },
+                            ticks: {
+                                font: { size: 9, weight: 'bold' }
+                            }
+                        }
+                    }
+                }
+            });
 
             // Store active data for filtering and table rendering
             applyFilters();
