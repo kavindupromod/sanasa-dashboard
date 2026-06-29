@@ -18,10 +18,53 @@ function getJson(url) {
     });
 }
 
+function postJson(url, body) {
+    return new Promise((resolve, reject) => {
+        const parsedUrl = new URL(url);
+        const postData = JSON.stringify(body);
+        const options = {
+            hostname: parsedUrl.hostname,
+            port: parsedUrl.port || 80,
+            path: parsedUrl.pathname,
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Content-Length': Buffer.byteLength(postData)
+            }
+        };
+        const req = http.request(options, (res) => {
+            let data = '';
+            res.on('data', chunk => { data += chunk; });
+            res.on('end', () => {
+                try {
+                    resolve(JSON.parse(data));
+                } catch (e) {
+                    resolve({ status: 'error', message: 'Parse error' });
+                }
+            });
+        });
+        req.on('error', err => { reject(err); });
+        req.write(postData);
+        req.end();
+    });
+}
+
 async function runTests() {
     console.log('Starting programmatic validation tests against http://localhost:3000 ...');
     
     try {
+        // Reset rules to standard defaults to ensure test independence
+        await postJson('http://localhost:3000/api/rules', {
+            newRules: [
+                {
+                    loanType: 'Isuru Loan (ඉසුරු ණය)',
+                    field: 'installments',
+                    operator: '>',
+                    value: 3
+                }
+            ]
+        });
+
         const data = await getJson('http://localhost:3000/api/data');
         
         console.log('\n--- API Integration Verification ---');

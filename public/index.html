@@ -358,21 +358,38 @@
                             <h3 class="font-bold text-base text-on-surface">Ledger Status Change Log</h3>
                             <p class="text-xs text-outline mt-0.5">Chronological trajectory analysis comparing current with previous ledger snapshots.</p>
                         </div>
-                        <div class="flex items-center gap-2 bg-surface-container-lowest p-1 rounded-lg border border-outline-variant">
-                            <button id="view-mode-all" onclick="changeTableFilter('ALL')" class="px-4 py-1.5 bg-primary text-white rounded-md text-xs font-bold shadow-sm transition-all focus:outline-none">All Changes</button>
-                            <button id="view-mode-new" onclick="changeTableFilter('NEW_PAST_DUE')" class="px-4 py-1.5 text-outline hover:text-on-surface rounded-md text-xs font-semibold transition-all focus:outline-none">New PastDue</button>
-                            <button id="view-mode-cleared" onclick="changeTableFilter('CLEARED')" class="px-4 py-1.5 text-outline hover:text-on-surface rounded-md text-xs font-semibold transition-all focus:outline-none">Cleared</button>
+                        <div class="flex flex-wrap items-center gap-1 bg-surface-container-lowest p-1 rounded-lg border border-outline-variant">
+                            <button id="view-mode-all" onclick="changeTableFilter('ALL')" class="px-3 py-1.5 bg-primary text-white rounded-md text-[11px] font-bold shadow-sm transition-all focus:outline-none">All (සියල්ල)</button>
+                            <button id="view-mode-new-past-due" onclick="changeTableFilter('NEW_PAST_DUE')" class="px-3 py-1.5 text-outline hover:text-on-surface rounded-md text-[11px] font-semibold transition-all focus:outline-none">New PastDue (නව)</button>
+                            <button id="view-mode-cleared" onclick="changeTableFilter('CLEARED')" class="px-3 py-1.5 text-outline hover:text-on-surface rounded-md text-[11px] font-semibold transition-all focus:outline-none">Cleared (පියවූ)</button>
+                            <button id="view-mode-amount-decreased" onclick="changeTableFilter('AMOUNT_DECREASED')" class="px-3 py-1.5 text-outline hover:text-on-surface rounded-md text-[11px] font-semibold transition-all focus:outline-none">Decreased (අඩු වූ)</button>
+                            <button id="view-mode-amount-increased" onclick="changeTableFilter('AMOUNT_INCREASED')" class="px-3 py-1.5 text-outline hover:text-on-surface rounded-md text-[11px] font-semibold transition-all focus:outline-none">Increased (වැඩි වූ)</button>
+                            <button id="view-mode-no-change" onclick="changeTableFilter('NO_CHANGE')" class="px-3 py-1.5 text-outline hover:text-on-surface rounded-md text-[11px] font-semibold transition-all focus:outline-none">No Change (වෙනසක් නැති)</button>
                         </div>
                     </div>
 
                     <!-- Filter Information Bar -->
-                    <div class="px-6 py-3 bg-surface-container/30 border-b border-outline-variant flex items-center justify-between text-xs text-outline">
-                        <div class="flex gap-4">
-                            <span id="count-all" class="font-medium">Total: 0</span>
-                            <span id="count-new" class="font-medium text-rose-700">New PastDue: 0</span>
+                    <div class="px-6 py-3 bg-surface-container/30 border-b border-outline-variant flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between text-xs text-outline">
+                        <div class="flex flex-wrap gap-x-4 gap-y-1">
+                            <span id="count-all" class="font-bold text-on-surface">Total: 0</span>
+                            <span id="count-new" class="font-medium text-rose-700">New: 0</span>
                             <span id="count-cleared" class="font-medium text-emerald-700">Cleared: 0</span>
-                            <span id="count-decreased" class="font-medium text-blue-700">Arrears Decreased: 0</span>
-                            <span id="count-increased" class="font-medium text-indigo-700">Arrears Increased: 0</span>
+                            <span id="count-decreased" class="font-medium text-teal-600">Decreased: 0</span>
+                            <span id="count-increased" class="font-medium text-indigo-700">Increased: 0</span>
+                        </div>
+                        <div class="flex flex-wrap items-center gap-4">
+                            <!-- Loan Type Filter Dropdown -->
+                            <div class="flex items-center gap-1.5">
+                                <label for="loan-type-filter" class="font-bold text-on-surface text-[10px] uppercase tracking-wider">Loan Type:</label>
+                                <select id="loan-type-filter" onchange="applyFilters()" class="px-2.5 py-1 bg-white border border-outline-variant rounded-md text-xs text-on-surface focus:outline-none focus:ring-1 focus:ring-primary">
+                                    <option value="ALL">All Loan Types</option>
+                                </select>
+                            </div>
+                            <!-- Rule Flag Checkbox -->
+                            <label class="flex items-center gap-1.5 cursor-pointer text-xs font-bold text-on-surface select-none">
+                                <input type="checkbox" id="rule-violation-filter" onchange="applyFilters()" class="w-3.5 h-3.5 rounded text-primary focus:ring-primary border-outline-variant"/>
+                                Only Rule Flags
+                            </label>
                         </div>
                     </div>
 
@@ -470,6 +487,9 @@
                     // Load zones into selector if empty
                     populateZoneSelector();
 
+                    // Load loan types filter dropdown
+                    populateLoanTypeSelector();
+
                     // Render rules configuration
                     renderRulesList();
 
@@ -554,6 +574,25 @@
                 select.appendChild(opt);
             });
             selectedZone = Number(select.value);
+        }
+
+        function populateLoanTypeSelector() {
+            const select = document.getElementById('loan-type-filter');
+            if (!select || !appData || !appData.loanTypes) return;
+            
+            const currentSelected = select.value || 'ALL';
+            
+            select.innerHTML = '<option value="ALL">All Loan Types (සියලු ණය වර්ග)</option>';
+            
+            appData.loanTypes.forEach(type => {
+                const opt = document.createElement('option');
+                opt.value = type;
+                opt.textContent = type;
+                if (type === currentSelected) {
+                    opt.selected = true;
+                }
+                select.appendChild(opt);
+            });
         }
 
         // Rules configuration management
@@ -769,13 +808,24 @@
             tableFilterMode = mode;
             currentPage = 1;
             
-            const btnAll = document.getElementById('view-mode-all');
-            const btnNew = document.getElementById('view-mode-new');
-            const btnCleared = document.getElementById('view-mode-cleared');
+            const modes = {
+                'ALL': 'view-mode-all',
+                'NEW_PAST_DUE': 'view-mode-new-past-due',
+                'CLEARED': 'view-mode-cleared',
+                'AMOUNT_DECREASED': 'view-mode-amount-decreased',
+                'AMOUNT_INCREASED': 'view-mode-amount-increased',
+                'NO_CHANGE': 'view-mode-no-change'
+            };
 
-            btnAll.className = mode === 'ALL' ? "px-4 py-1.5 bg-primary text-white rounded-md text-xs font-bold shadow-sm transition-all focus:outline-none" : "px-4 py-1.5 text-outline hover:text-on-surface rounded-md text-xs font-semibold transition-all focus:outline-none";
-            btnNew.className = mode === 'NEW_PAST_DUE' ? "px-4 py-1.5 bg-primary text-white rounded-md text-xs font-bold shadow-sm transition-all focus:outline-none" : "px-4 py-1.5 text-outline hover:text-on-surface rounded-md text-xs font-semibold transition-all focus:outline-none";
-            btnCleared.className = mode === 'CLEARED' ? "px-4 py-1.5 bg-primary text-white rounded-md text-xs font-bold shadow-sm transition-all focus:outline-none" : "px-4 py-1.5 text-outline hover:text-on-surface rounded-md text-xs font-semibold transition-all focus:outline-none";
+            for (const [m, id] of Object.entries(modes)) {
+                const btn = document.getElementById(id);
+                if (!btn) continue;
+                if (m === mode) {
+                    btn.className = "px-3 py-1.5 bg-primary text-white rounded-md text-[11px] font-bold shadow-sm transition-all focus:outline-none";
+                } else {
+                    btn.className = "px-3 py-1.5 text-outline hover:text-on-surface rounded-md text-[11px] font-semibold transition-all focus:outline-none";
+                }
+            }
 
             applyFilters();
         }
@@ -784,18 +834,30 @@
             if (!appData) return;
 
             const searchQuery = document.getElementById('search-input').value.toLowerCase().trim();
+            const loanTypeFilter = document.getElementById('loan-type-filter').value;
+            const onlyRuleViolations = document.getElementById('rule-violation-filter').checked;
+            
             const zoneChanges = appData.changes.filter(r => Number(r.zone) === Number(selectedZone));
 
             let data = zoneChanges;
 
-            // Apply status toggle filter
-            if (tableFilterMode === 'NEW_PAST_DUE') {
-                data = data.filter(c => c.type === 'NEW_PAST_DUE');
-            } else if (tableFilterMode === 'CLEARED') {
-                data = data.filter(c => c.type === 'CLEARED');
+            // 1. Filter by status change trajectory type
+            if (tableFilterMode !== 'ALL') {
+                data = data.filter(c => c.type === tableFilterMode);
             }
 
-            // Apply search filter
+            // 2. Filter by loan type
+            if (loanTypeFilter !== 'ALL') {
+                data = data.filter(c => c.loanType === loanTypeFilter);
+            }
+
+            // 3. Filter by active rule violation flags
+            if (onlyRuleViolations) {
+                const violatorsMap = new Set(appData.violations.filter(v => v.isPastDueViolation).map(v => `${v.memberId}_${v.loanType}`));
+                data = data.filter(c => violatorsMap.has(`${c.memberId}_${c.loanType}`));
+            }
+
+            // 4. Filter by search query
             if (searchQuery) {
                 data = data.filter(c => 
                     c.memberId.toLowerCase().includes(searchQuery) ||
