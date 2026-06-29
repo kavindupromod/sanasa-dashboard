@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>PastDue Ledger - Zone Analytics</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "tertiary-fixed-dim": "#adc6ff",
+                    "outline-variant": "#bbcac6",
+                    "surface-container": "#e5eeff",
+                    "on-background": "#0b1c30",
+                    "outline": "#6c7a77",
+                    "error": "#ba1a1a",
+                    "on-tertiary": "#ffffff",
+                    "on-secondary": "#ffffff",
+                    "on-tertiary-container": "#00377d",
+                    "on-error": "#ffffff",
+                    "primary-container": "#14b8a6",
+                    "on-secondary-fixed-variant": "#37466b",
+                    "surface-dim": "#cbdbf5",
+                    "on-secondary-container": "#4a597f",
+                    "inverse-surface": "#213145",
+                    "on-primary-container": "#00423b",
+                    "on-secondary-fixed": "#081a3d",
+                    "primary-fixed-dim": "#4fdbc8",
+                    "surface-variant": "#d3e4fe",
+                    "secondary-fixed-dim": "#b6c6f1",
+                    "background": "#f8f9ff",
+                    "tertiary-fixed": "#d8e2ff",
+                    "surface": "#f8f9ff",
+                    "surface-container-high": "#dce9ff",
+                    "secondary-container": "#c1d1fd",
+                    "surface-container-low": "#eff4ff",
+                    "surface-container-lowest": "#ffffff",
+                    "primary-fixed": "#71f8e4",
+                    "tertiary-container": "#75a3ff",
+                    "secondary": "#4e5e84",
+                    "on-primary-fixed": "#00201c",
+                    "surface-tint": "#006b5f",
+                    "inverse-on-surface": "#eaf1ff",
+                    "on-primary-fixed-variant": "#005048",
+                    "tertiary": "#005ac2",
+                    "inverse-primary": "#4fdbc8",
+                    "on-surface-variant": "#3c4947",
+                    "secondary-fixed": "#d9e2ff",
+                    "on-surface": "#0b1c30",
+                    "surface-container-highest": "#d3e4fe",
+                    "on-tertiary-fixed": "#001a42",
+                    "primary": "#006b5f",
+                    "on-error-container": "#93000a",
+                    "on-tertiary-fixed-variant": "#004395",
+                    "surface-bright": "#f8f9ff",
+                    "error-container": "#ffdad6",
+                    "on-primary": "#ffffff"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.125rem",
+                    "lg": "0.25rem",
+                    "xl": "0.5rem",
+                    "full": "0.75rem"
+            },
+            "spacing": {
+                    "stack-sm": "0.5rem",
+                    "stack-md": "1rem",
+                    "container-max-width": "1440px",
+                    "stack-lg": "1.5rem",
+                    "section-padding": "2rem",
+                    "sidebar-width": "260px",
+                    "gutter": "1.5rem"
+            },
+            "fontFamily": {
+                    "headline-lg": ["Inter"],
+                    "mono-data": ["Inter"],
+                    "headline-md": ["Inter"],
+                    "headline-lg-mobile": ["Inter"],
+                    "display-lg": ["Inter"],
+                    "body-lg": ["Inter"],
+                    "body-md": ["Inter"],
+                    "label-md": ["Inter"]
+            },
+            "fontSize": {
+                    "headline-lg": ["24px", {"lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                    "mono-data": ["14px", {"lineHeight": "20px", "fontWeight": "500"}],
+                    "headline-md": ["20px", {"lineHeight": "28px", "fontWeight": "600"}],
+                    "headline-lg-mobile": ["20px", {"lineHeight": "28px", "fontWeight": "600"}],
+                    "display-lg": ["36px", {"lineHeight": "44px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                    "body-lg": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                    "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                    "label-md": ["12px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "600"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        body {
+            background-color: #f8f9ff;
+            font-family: 'Inter', sans-serif;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 10px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+    </style>
+</head>
+<body class="text-on-surface">
+<!-- SideNavBar Anchor -->
+<aside class="fixed left-0 top-0 h-full w-[260px] bg-on-secondary-fixed dark:bg-on-secondary-fixed flex flex-col py-stack-lg shadow-sm z-50">
+<div class="px-6 mb-8">
+<h1 class="font-headline-md text-headline-md font-bold text-surface-container-lowest">PastDue Ledger</h1>
+<p class="text-surface-variant font-body-md opacity-70">Financial Controller</p>
+</div>
+<nav class="flex-grow space-y-1">
+<!-- Dashboard -->
+<div class="flex items-center gap-3 px-4 py-3 text-surface-variant hover:bg-on-secondary-fixed-variant hover:text-primary-fixed-dim transition-colors cursor-pointer active:opacity-80">
+<span class="material-symbols-outlined">dashboard</span>
+<span class="font-body-md text-body-md">Dashboard</span>
+</div>
+<!-- Data Upload -->
+<div class="flex items-center gap-3 px-4 py-3 text-surface-variant hover:bg-on-secondary-fixed-variant hover:text-primary-fixed-dim transition-colors cursor-pointer active:opacity-80">
+<span class="material-symbols-outlined">cloud_upload</span>
+<span class="font-body-md text-body-md">Data Upload</span>
+</div>
+<!-- Zone Analytics (Active) -->
+<div class="flex items-center gap-3 px-4 py-3 text-primary-fixed border-l-4 border-primary bg-on-secondary-fixed-variant cursor-pointer active:opacity-80">
+<span class="material-symbols-outlined">analytics</span>
+<span class="font-body-md text-body-md">Zone Analytics</span>
+</div>
+<!-- Reports -->
+<div class="flex items-center gap-3 px-4 py-3 text-surface-variant hover:bg-on-secondary-fixed-variant hover:text-primary-fixed-dim transition-colors cursor-pointer active:opacity-80">
+<span class="material-symbols-outlined">assessment</span>
+<span class="font-body-md text-body-md">Reports</span>
+</div>
+</nav>
+<div class="px-6 mt-auto pt-6 border-t border-on-secondary-fixed-variant flex items-center gap-3">
+<div class="w-10 h-10 rounded-full bg-primary-container flex items-center justify-center text-on-primary-container font-bold">
+                JD
+            </div>
+<div class="overflow-hidden">
+<p class="text-surface-container-lowest font-body-md truncate">John Doe</p>
+<p class="text-surface-variant text-label-md truncate">Admin Access</p>
+</div>
+</div>
+</aside>
+<!-- TopNavBar Anchor -->
+<header class="flex justify-between items-center h-16 px-gutter ml-[260px] w-[calc(100%-260px)] bg-surface-container-lowest dark:bg-on-background border-b border-outline-variant fixed top-0 z-40">
+<div class="flex items-center gap-4 flex-grow">
+<div class="relative w-full max-w-md focus-within:ring-2 focus-within:ring-primary rounded-lg transition-all">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant">search</span>
+<input class="w-full pl-10 pr-4 py-2 bg-background border-none rounded-lg text-body-md focus:ring-0" placeholder="Search members, zones, or rules..." type="text"/>
+</div>
+</div>
+<div class="flex items-center gap-6">
+<button class="relative text-on-surface-variant hover:text-primary transition-colors">
+<span class="material-symbols-outlined">notifications</span>
+<span class="absolute top-0 right-0 w-2 h-2 bg-error rounded-full"></span>
+</button>
+<div class="flex items-center gap-2 text-primary font-bold cursor-pointer hover:opacity-80 transition-opacity">
+<span class="material-symbols-outlined">account_circle</span>
+<span class="font-headline-md text-headline-md">Account</span>
+</div>
+</div>
+</header>
+<!-- Main Content Canvas -->
+<main class="ml-[260px] pt-24 px-gutter pb-12 max-w-[1440px] mx-auto min-h-screen">
+<!-- Header Section with Zone Selection -->
+<div class="flex flex-col md:flex-row md:items-end justify-between gap-stack-lg mb-stack-lg">
+<div class="w-full md:w-1/3">
+<label class="block font-label-md text-outline mb-2 uppercase tracking-wider">Select Zone / බල ප්‍රදේශය</label>
+<div class="relative">
+<select class="w-full bg-surface-container-lowest border border-outline-variant px-4 py-3 rounded-xl font-headline-md text-primary appearance-none cursor-pointer focus:ring-2 focus:ring-primary focus:border-primary">
+<option value="bala-pradeshaya">Bala Pradeshaya (බල ප්‍රදේශය)</option>
+<option value="colombo-north">Colombo North</option>
+<option value="kandy-central">Kandy Central</option>
+<option value="galle-south">Galle South</option>
+</select>
+<span class="material-symbols-outlined absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-primary">expand_more</span>
+</div>
+</div>
+<div class="flex gap-4">
+<button class="flex items-center gap-2 bg-surface-container-lowest border border-outline-variant text-on-surface-variant px-4 py-2 rounded-lg hover:bg-surface-variant transition-colors">
+<span class="material-symbols-outlined">filter_list</span>
+<span class="font-body-md">Filter By Date</span>
+</button>
+<button class="flex items-center gap-2 bg-primary text-on-primary px-6 py-2 rounded-lg hover:opacity-90 shadow-sm transition-all">
+<span class="material-symbols-outlined">download</span>
+<span class="font-body-md font-semibold">Export Report</span>
+</button>
+</div>
+</div>
+<!-- Top Row Metrics -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-gutter mb-stack-lg">
+<!-- Card 1: Members Comparison -->
+<div class="bg-surface-container-lowest p-6 rounded-xl border border-outline-variant shadow-sm hover:shadow-md transition-shadow relative overflow-hidden">
+<div class="absolute top-0 right-0 p-4 opacity-10">
+<span class="material-symbols-outlined text-[64px]">group</span>
+</div>
+<h3 class="font-label-md text-outline uppercase tracking-wider mb-4">Total Members Analysis</h3>
+<div class="flex items-end justify-between">
+<div class="space-y-1">
+<p class="font-display-lg text-display-lg text-on-surface">1,402</p>
+<p class="font-body-md text-outline">Current Active Members</p>
+</div>
+<div class="text-right">
+<div class="flex items-center justify-end text-primary-container font-bold gap-1">
+<span class="material-symbols-outlined text-sm">trending_up</span>
+<span class="font-mono-data">4.2%</span>
+</div>
+<p class="font-label-md text-outline">Vs Previous (1,345)</p>
+</div>
+</div>
+<div class="mt-4 w-full bg-surface-variant h-1 rounded-full overflow-hidden">
+<div class="bg-primary-container h-full w-[85%]"></div>
+</div>
+</div>
+<!-- Card 2: PastDue Amount Comparison -->
+<div class="bg-surface-container-lowest p-6 rounded-xl border border-outline-variant shadow-sm hover:shadow-md transition-shadow relative overflow-hidden">
+<div class="absolute top-0 right-0 p-4 opacity-10">
+<span class="material-symbols-outlined text-[64px]">account_balance_wallet</span>
+</div>
+<h3 class="font-label-md text-outline uppercase tracking-wider mb-4">Total PastDue Amount</h3>
+<div class="flex items-end justify-between">
+<div class="space-y-1">
+<p class="font-display-lg text-display-lg text-on-surface">LKR 2.45M</p>
+<p class="font-body-md text-outline">Current Arrears</p>
+</div>
+<div class="text-right">
+<div class="flex items-center justify-end text-error font-bold gap-1">
+<span class="material-symbols-outlined text-sm">trending_up</span>
+<span class="font-mono-data">12.8%</span>
+</div>
+<p class="font-label-md text-outline">Vs Prev (LKR 2.17M)</p>
+</div>
+</div>
+<div class="mt-4 w-full bg-surface-variant h-1 rounded-full overflow-hidden">
+<div class="bg-error h-full w-[65%]"></div>
+</div>
+</div>
+</div>
+<!-- Middle Row: Specific Loan Rule Highlight -->
+<div class="mb-stack-lg">
+<div class="bg-on-background text-on-primary-fixed p-8 rounded-2xl shadow-xl flex flex-col md:flex-row items-center justify-between gap-8 relative overflow-hidden">
+<div class="absolute top-[-20%] left-[-5%] w-64 h-64 bg-primary rounded-full blur-[100px] opacity-20"></div>
+<div class="relative z-10 space-y-4">
+<div class="flex items-center gap-3">
+<span class="bg-primary-container text-on-primary-container px-3 py-1 rounded-full font-label-md">CRITICAL ALERT</span>
+<span class="text-outline-variant font-body-md">Rule: Installments &gt; 3</span>
+</div>
+<h2 class="font-display-lg text-display-lg leading-tight">Isuru Loan (ඉසුරු ණය) <br/><span class="text-primary-fixed">Past Due Threshold Hit</span></h2>
+<p class="text-surface-variant font-body-md max-w-lg">Specific criteria for the Isuru portfolio indicates a surge in members exceeding the 3-month grace period. Immediate collection action recommended for the following segment.</p>
+</div>
+<div class="relative z-10 bg-surface-container-lowest/10 backdrop-blur-md border border-white/10 p-8 rounded-2xl text-center min-w-[240px]">
+<p class="font-display-lg text-[64px] font-extrabold text-primary-fixed">12</p>
+<p class="font-headline-md text-headline-md text-white">Members Today</p>
+<div class="mt-4 py-2 bg-error/20 text-error-container rounded-lg font-label-md border border-error/30">
+                        AUTOMATICALLY FLAGGED
+                    </div>
+</div>
+</div>
+</div>
+<!-- Bottom Row: Status Change Log & Data Table -->
+<div class="bg-surface-container-lowest rounded-xl border border-outline-variant shadow-sm overflow-hidden">
+<div class="px-gutter py-6 border-b border-outline-variant flex justify-between items-center bg-surface-container-low">
+<div>
+<h3 class="font-headline-md text-headline-md text-on-surface">Status Change Log</h3>
+<p class="font-body-md text-outline">Yesterday vs. Today's Comparative Ledger Data</p>
+</div>
+<div class="flex items-center gap-4 bg-surface-container-lowest p-1 rounded-lg border border-outline-variant">
+<button class="px-4 py-2 bg-primary text-on-primary rounded-md font-label-md">Summary View</button>
+<button class="px-4 py-2 text-outline font-label-md hover:bg-surface-variant transition-colors">Detailed Audit</button>
+</div>
+</div>
+<div class="overflow-x-auto custom-scrollbar">
+<table class="w-full text-left border-collapse min-w-[1000px]">
+<thead>
+<tr class="bg-surface-container-low/50">
+<th class="px-6 py-4 font-label-md text-outline uppercase tracking-wider">Member ID (id අංකය)</th>
+<th class="px-6 py-4 font-label-md text-outline uppercase tracking-wider">Member Name (ගනුදෙනුකරු)</th>
+<th class="px-6 py-4 font-label-md text-outline uppercase tracking-wider">Loan Type (ණය වර්ගය)</th>
+<th class="px-6 py-4 font-label-md text-outline uppercase tracking-wider">Missed Installments</th>
+<th class="px-6 py-4 font-label-md text-outline uppercase tracking-wider text-right">Balance Change</th>
+<th class="px-6 py-4 font-label-md text-outline uppercase tracking-wider text-center">Status</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-outline-variant">
+<!-- Row 1 -->
+<tr class="hover:bg-background transition-colors">
+<td class="px-6 py-4 font-mono-data text-on-surface">MBR-9821</td>
+<td class="px-6 py-4 font-body-md font-semibold text-on-surface">Priyanka Perera</td>
+<td class="px-6 py-4 font-body-md text-outline">Isuru Loan</td>
+<td class="px-6 py-4 font-body-md text-on-surface">
+<span class="text-error font-bold">4</span> / 12
+                            </td>
+<td class="px-6 py-4 font-mono-data text-right text-on-surface">+LKR 24,500.00</td>
+<td class="px-6 py-4 text-center">
+<span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-error/10 text-error uppercase">New PastDue</span>
+</td>
+</tr>
+<!-- Row 2 -->
+<tr class="hover:bg-background transition-colors">
+<td class="px-6 py-4 font-mono-data text-on-surface">MBR-1029</td>
+<td class="px-6 py-4 font-body-md font-semibold text-on-surface">Sunil Wijesinghe</td>
+<td class="px-6 py-4 font-body-md text-outline">Personal Loan</td>
+<td class="px-6 py-4 font-body-md text-on-surface">0 / 24</td>
+<td class="px-6 py-4 font-mono-data text-right text-primary-container">-LKR 82,000.00</td>
+<td class="px-6 py-4 text-center">
+<span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-primary-container/10 text-primary uppercase">Cleared</span>
+</td>
+</tr>
+<!-- Row 3 -->
+<tr class="hover:bg-background transition-colors">
+<td class="px-6 py-4 font-mono-data text-on-surface">MBR-4432</td>
+<td class="px-6 py-4 font-body-md font-semibold text-on-surface">Kusumawathie Silva</td>
+<td class="px-6 py-4 font-body-md text-outline">Isuru Loan</td>
+<td class="px-6 py-4 font-body-md text-on-surface">
+<span class="text-error font-bold">5</span> / 10
+                            </td>
+<td class="px-6 py-4 font-mono-data text-right text-tertiary">+LKR 12,200.00</td>
+<td class="px-6 py-4 text-center">
+<span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-tertiary-container/20 text-tertiary-container uppercase">Amount Increased</span>
+</td>
+</tr>
+<!-- Row 4 -->
+<tr class="hover:bg-background transition-colors">
+<td class="px-6 py-4 font-mono-data text-on-surface">MBR-8762</td>
+<td class="px-6 py-4 font-body-md font-semibold text-on-surface">Amara Gunawardena</td>
+<td class="px-6 py-4 font-body-md text-outline">Isuru Loan</td>
+<td class="px-6 py-4 font-body-md text-on-surface">
+<span class="text-error font-bold">4</span> / 12
+                            </td>
+<td class="px-6 py-4 font-mono-data text-right text-on-surface">+LKR 18,900.00</td>
+<td class="px-6 py-4 text-center">
+<span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-error/10 text-error uppercase">New PastDue</span>
+</td>
+</tr>
+<!-- Row 5 -->
+<tr class="hover:bg-background transition-colors">
+<td class="px-6 py-4 font-mono-data text-on-surface">MBR-2210</td>
+<td class="px-6 py-4 font-body-md font-semibold text-on-surface">Ruwan Perera</td>
+<td class="px-6 py-4 font-body-md text-outline">Vehicle Loan</td>
+<td class="px-6 py-4 font-body-md text-on-surface">0 / 60</td>
+<td class="px-6 py-4 font-mono-data text-right text-primary-container">-LKR 145,000.00</td>
+<td class="px-6 py-4 text-center">
+<span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-primary-container/10 text-primary uppercase">Cleared</span>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="px-gutter py-4 bg-surface-container-low flex items-center justify-between">
+<p class="font-label-md text-outline">Showing 5 of 12 new changes flagged today</p>
+<div class="flex items-center gap-2">
+<button class="p-2 text-outline hover:text-primary disabled:opacity-30" disabled="">
+<span class="material-symbols-outlined">chevron_left</span>
+</button>
+<span class="font-label-md font-bold px-3 py-1 bg-primary text-on-primary rounded">1</span>
+<button class="p-2 text-outline hover:text-primary">
+<span class="material-symbols-outlined">chevron_right</span>
+</button>
+</div>
+</div>
+</div>
+</main>
+<!-- Visual Polish: Floating Status Badge -->
+<div class="fixed bottom-8 right-8 z-50 flex items-center gap-4 bg-on-background text-white p-4 rounded-2xl shadow-2xl animate-bounce">
+<div class="w-3 h-3 bg-primary-container rounded-full animate-pulse"></div>
+<p class="font-body-md font-semibold">Live System Audit Underway</p>
+<span class="material-symbols-outlined text-surface-variant">sync</span>
+</div>
+<script>
+        // Simple micro-interaction for rows
+        document.querySelectorAll('tbody tr').forEach(row => {
+            row.addEventListener('click', () => {
+                row.classList.toggle('bg-primary-container/5');
+            });
+        });
+
+        // Dropdown interaction effect
+        const select = document.querySelector('select');
+        select.addEventListener('focus', () => {
+            select.parentElement.classList.add('scale-[1.02]');
+        });
+        select.addEventListener('blur', () => {
+            select.parentElement.classList.remove('scale-[1.02]');
+        });
+    </script>
+</body></html>

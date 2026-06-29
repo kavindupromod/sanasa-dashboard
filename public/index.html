@@ -1,0 +1,1006 @@
+<!DOCTYPE html>
+<html class="light" lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>PastDue Ledger | Data Comparison & Analytics</title>
+    <!-- Tailwind CSS with Forms and Container Queries plugins -->
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#006b5f",
+                        "primary-container": "#14b8a6",
+                        "on-primary-container": "#00423b",
+                        "secondary": "#4e5e84",
+                        "secondary-container": "#c1d1fd",
+                        "on-secondary-container": "#4a597f",
+                        "on-secondary-fixed": "#081a3d",
+                        "on-secondary-fixed-variant": "#37466b",
+                        "background": "#f8f9ff",
+                        "on-background": "#0b1c30",
+                        "surface": "#f8f9ff",
+                        "surface-dim": "#cbdbf5",
+                        "surface-bright": "#f8f9ff",
+                        "surface-container-lowest": "#ffffff",
+                        "surface-container-low": "#eff4ff",
+                        "surface-container": "#e5eeff",
+                        "surface-container-high": "#dce9ff",
+                        "surface-container-highest": "#d3e4fe",
+                        "on-surface": "#0b1c30",
+                        "on-surface-variant": "#3c4947",
+                        "outline-variant": "#bbcac6",
+                        "outline": "#6c7a77",
+                        "error": "#ba1a1a",
+                        "error-container": "#ffdad6",
+                        "on-error-container": "#93000a",
+                        "tertiary": "#005ac2",
+                        "tertiary-container": "#75a3ff",
+                        "on-tertiary-container": "#00377d",
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.25rem",
+                        "sm": "0.125rem",
+                        "md": "0.375rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    spacing: {
+                        "stack-sm": "0.5rem",
+                        "stack-md": "1rem",
+                        "stack-lg": "1.5rem",
+                        "gutter": "1.5rem",
+                        "section-padding": "2rem",
+                        "sidebar-width": "260px",
+                        "container-max-width": "1440px"
+                    },
+                    fontFamily: {
+                        sans: ["Inter", "sans-serif"]
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8f9ff;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            vertical-align: middle;
+        }
+        /* Custom scrollbar for wide data tables */
+        .custom-scrollbar::-webkit-scrollbar {
+            height: 6px;
+            width: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 10px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+        .drag-zone-active {
+            border-color: #006b5f;
+            background-color: rgba(0, 107, 95, 0.05);
+        }
+        /* Class to support legacy Sinhala fonts if installed on client systems */
+        .legacy-sinhala {
+            font-family: 'FMAbhaya', 'FMApril', 'FMBindumathi', 'Inter', sans-serif;
+            font-size: 1.05rem;
+            letter-spacing: 0.02em;
+        }
+    </style>
+</head>
+<body class="text-on-surface min-h-screen flex overflow-hidden">
+
+    <!-- Persistent SideNavBar (Deep Navy background) -->
+    <aside class="fixed left-0 top-0 h-full w-[260px] bg-on-secondary-fixed flex flex-col py-stack-lg shadow-md z-50">
+        <div class="px-6 mb-10">
+            <h1 class="font-bold text-[22px] text-surface-container-lowest tracking-tight">PastDue Ledger</h1>
+            <p class="text-surface-dim text-[12px] font-medium opacity-80 mt-1">Financial Controller</p>
+        </div>
+        
+        <nav class="flex-grow space-y-1">
+            <!-- Data Sync & Upload Tab -->
+            <button id="tab-sync" onclick="switchTab('sync')" class="w-full flex items-center gap-3 px-6 py-4 text-primary-fixed border-l-4 border-primary bg-on-secondary-fixed-variant transition-colors cursor-pointer text-left focus:outline-none">
+                <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">cloud_upload</span>
+                <span class="font-medium text-sm">Data Sync & Upload</span>
+            </button>
+            <!-- Zone Analytics Tab -->
+            <button id="tab-analytics" onclick="switchTab('analytics')" class="w-full flex items-center gap-3 px-6 py-4 text-surface-dim hover:bg-on-secondary-fixed-variant/50 hover:text-white transition-colors cursor-pointer text-left focus:outline-none">
+                <span class="material-symbols-outlined">analytics</span>
+                <span class="font-medium text-sm">Zone Analytics</span>
+            </button>
+        </nav>
+
+        <div class="px-6 mt-auto">
+            <div class="flex items-center gap-3 p-3 rounded-xl bg-on-secondary-fixed-variant/30 border border-white/10">
+                <div class="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-white font-bold">JD</div>
+                <div class="overflow-hidden">
+                    <p class="text-white text-sm font-semibold truncate">John Doe</p>
+                    <p class="text-surface-dim text-[11px] truncate opacity-70">Admin Access</p>
+                </div>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Main Canvas Area -->
+    <main class="ml-[260px] w-[calc(100%-260px)] flex flex-col h-screen overflow-hidden">
+        
+        <!-- Top Header Bar -->
+        <header class="flex justify-between items-center h-16 px-gutter border-b border-outline-variant bg-surface-container-lowest sticky top-0 z-40 shadow-sm flex-shrink-0">
+            <div class="flex items-center gap-4 flex-1">
+                <div class="relative w-full max-w-md focus-within:ring-2 focus-within:ring-primary rounded-lg transition-all">
+                    <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline">search</span>
+                    <input id="search-input" oninput="applyFilters()" class="w-full pl-10 pr-4 py-2 bg-surface-container-low border-none rounded-lg text-sm focus:ring-0 text-on-surface" placeholder="Search members, loan types, or IDs..." type="text"/>
+                </div>
+            </div>
+            
+            <div class="flex items-center gap-6">
+                <!-- System Status Indicator (inline in header) -->
+                <div id="header-status-indicator" class="flex items-center gap-2 px-3 py-1.5 bg-surface-container-low rounded-lg border border-outline-variant text-[11px] font-semibold text-on-surface transition-all duration-300">
+                    <div class="w-2 h-2 bg-amber-500 rounded-full animate-pulse"></div>
+                    <span id="header-status-text">Ledger Sync: Running</span>
+                    <span id="header-status-icon" class="material-symbols-outlined animate-spin text-[14px]">sync</span>
+                </div>
+
+                <div class="flex items-center gap-2 text-primary font-semibold">
+                    <span class="material-symbols-outlined">account_circle</span>
+                    <span class="text-sm">Account</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- Dynamic Content Panel -->
+        <div id="content-area" class="flex-grow overflow-y-auto p-section-padding max-w-container-max-width mx-auto w-full">
+            
+            <!-- SECTION 1: DATA SYNC & UPLOAD VIEW -->
+            <section id="view-sync" class="space-y-stack-lg">
+                <div class="flex flex-col gap-1">
+                    <h2 class="text-2xl font-bold text-on-background">Data Synchronization & Comparison</h2>
+                    <p class="text-sm text-outline">Upload and sync previous and current past-due ledger files to calculate payment trajectories.</p>
+                </div>
+
+                <!-- Load Status Alert -->
+                <div id="sync-status-card" class="bg-surface-container-low border border-outline-variant p-4 rounded-xl flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                        <span id="sync-status-icon" class="material-symbols-outlined text-amber-600 text-3xl">info</span>
+                        <div>
+                            <p id="sync-status-title" class="font-semibold text-sm text-on-background">Analyzing Root Folder...</p>
+                            <p id="sync-status-desc" class="text-xs text-outline">Checking for default Excel snapshots.</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <span class="text-xs text-outline bg-white px-3 py-1 rounded-md border border-outline-variant">Auto-detect Active</span>
+                    </div>
+                </div>
+
+                <!-- Drag & Drop Upload Cards -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-gutter">
+                    <!-- Card A: Previous File -->
+                    <div class="bg-surface-container-lowest rounded-xl border border-outline-variant p-6 shadow-sm flex flex-col gap-4">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-lg bg-surface-container flex items-center justify-center text-primary">
+                                <span class="material-symbols-outlined">history</span>
+                            </div>
+                            <div>
+                                <h3 class="font-bold text-sm text-on-background">Previous Ledger File (Yesterday)</h3>
+                                <p class="text-xs text-outline mt-0.5" id="prev-file-info">Default: pastdue_2026-05-06.xls</p>
+                            </div>
+                        </div>
+                        <div class="flex-grow border-2 border-dashed border-outline-variant rounded-xl flex flex-col items-center justify-center py-10 px-6 bg-surface-container-low hover:border-primary transition-all group cursor-pointer" id="dropzone-prev">
+                            <span class="material-symbols-outlined text-4xl text-outline mb-3 group-hover:text-primary transition-colors" id="icon-prev">cloud_upload</span>
+                            <p class="text-xs text-on-surface-variant mb-4 text-center font-medium" id="text-prev">Drag & drop previous Excel file or click to browse</p>
+                            <input type="file" id="file-input-prev" class="hidden" accept=".xls,.xlsx"/>
+                            <button type="button" class="px-5 py-2 border border-secondary text-secondary rounded-lg text-xs font-semibold hover:bg-secondary-container hover:text-on-secondary-container transition-colors">
+                                Browse Files
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Card B: Current File -->
+                    <div class="bg-surface-container-lowest rounded-xl border border-outline-variant p-6 shadow-sm flex flex-col gap-4">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-lg bg-teal-50 flex items-center justify-center text-primary">
+                                <span class="material-symbols-outlined">update</span>
+                            </div>
+                            <div>
+                                <h3 class="font-bold text-sm text-on-background">Current Ledger File (Today)</h3>
+                                <p class="text-xs text-outline mt-0.5" id="curr-file-info">Default: pastdue_2026-06-11.xls</p>
+                            </div>
+                        </div>
+                        <div class="flex-grow border-2 border-dashed border-outline-variant rounded-xl flex flex-col items-center justify-center py-10 px-6 bg-surface-container-low hover:border-primary transition-all group cursor-pointer" id="dropzone-curr">
+                            <span class="material-symbols-outlined text-4xl text-outline mb-3 group-hover:text-primary transition-colors" id="icon-curr">cloud_upload</span>
+                            <p class="text-xs text-on-surface-variant mb-4 text-center font-medium" id="text-curr">Drag & drop current Excel file or click to browse</p>
+                            <input type="file" id="file-input-curr" class="hidden" accept=".xls,.xlsx"/>
+                            <button type="button" class="px-5 py-2 border border-secondary text-secondary rounded-lg text-xs font-semibold hover:bg-secondary-container hover:text-on-secondary-container transition-colors">
+                                Browse Files
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Dynamic Rules Configuration Section -->
+                <div class="bg-surface-container-lowest rounded-xl border border-outline-variant p-6 shadow-sm">
+                    <div class="flex justify-between items-center border-b border-outline-variant pb-4 mb-4">
+                        <div>
+                            <h3 class="text-base font-bold text-on-background">Dynamic Past Due Rules Configuration</h3>
+                            <p class="text-xs text-outline">Define classification conditions per loan type based on missed installments.</p>
+                        </div>
+                        <button onclick="addRuleRow()" class="px-4 py-2 bg-primary hover:bg-[#005048] text-white rounded-lg text-xs font-bold flex items-center gap-1.5 transition-colors shadow-sm">
+                            <span class="material-symbols-outlined text-sm">add</span> Add Rule
+                        </button>
+                    </div>
+
+                    <!-- Rules List -->
+                    <div id="rules-container" class="space-y-3">
+                        <!-- Dynamic rules loaded here -->
+                    </div>
+
+                    <!-- Rules Actions -->
+                    <div class="flex justify-end gap-3 mt-6 pt-4 border-t border-outline-variant">
+                        <button onclick="resetRules()" class="px-4 py-2 border border-outline text-on-surface rounded-lg text-xs font-semibold hover:bg-surface-container-low transition-colors">
+                            Reset to Default
+                        </button>
+                        <button onclick="saveRules()" class="px-5 py-2 bg-primary hover:bg-[#005048] text-white rounded-lg text-xs font-bold transition-colors shadow-sm">
+                            Save & Re-run Analytics
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SECTION 2: ZONE ANALYTICS VIEW (Hidden by default) -->
+            <section id="view-analytics" class="space-y-stack-lg hidden">
+                <!-- Zone Selector & Actions Header -->
+                <div class="flex flex-col md:flex-row md:items-end justify-between gap-stack-lg border-b border-outline-variant pb-6">
+                    <div class="w-full md:w-1/3">
+                        <label class="block font-semibold text-xs text-outline mb-2 uppercase tracking-wider">Select Zone / බල ප්‍රදේශය</label>
+                        <div class="relative">
+                            <select id="zone-select" onchange="changeZone()" class="w-full bg-surface-container-lowest border border-outline-variant px-4 py-3 rounded-xl font-semibold text-primary appearance-none cursor-pointer focus:ring-2 focus:ring-primary focus:border-primary outline-none">
+                                <!-- Loaded dynamically -->
+                            </select>
+                            <span class="material-symbols-outlined absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-primary">expand_more</span>
+                        </div>
+                    </div>
+                    <div class="flex gap-4">
+                        <button onclick="downloadReport()" class="flex items-center gap-2 bg-primary text-white px-5 py-2.5 rounded-lg hover:bg-[#005048] shadow-sm transition-all text-sm font-semibold">
+                            <span class="material-symbols-outlined text-sm">download</span>
+                            <span>Export Zone Report</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- KPI Widgets Grid -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-gutter">
+                    <!-- Widget 1: Members Comparison -->
+                    <div class="bg-surface-container-lowest p-6 rounded-xl border border-outline-variant shadow-sm relative overflow-hidden flex flex-col justify-between min-h-[140px]">
+                        <div class="absolute top-0 right-0 p-4 opacity-5 text-on-background">
+                            <span class="material-symbols-outlined text-[64px]">group</span>
+                        </div>
+                        <h3 class="font-bold text-xs text-outline uppercase tracking-wider mb-2">Total Zone Members Analysis</h3>
+                        <div class="flex items-end justify-between mt-auto">
+                            <div>
+                                <p id="kpi-member-count" class="text-3xl font-bold tracking-tight text-on-surface">0</p>
+                                <p class="text-xs text-outline mt-1">Current Active PastDue Members</p>
+                            </div>
+                            <div class="text-right">
+                                <div id="kpi-member-trend" class="flex items-center justify-end font-bold gap-1 text-sm">
+                                    <!-- Dynamic Trend -->
+                                </div>
+                                <p id="kpi-member-prev" class="text-[10px] text-outline mt-1"></p>
+                            </div>
+                        </div>
+                        <div class="mt-4 w-full bg-surface-container h-1.5 rounded-full overflow-hidden">
+                            <div id="kpi-member-bar" class="bg-primary-container h-full transition-all duration-500" style="width: 0%"></div>
+                        </div>
+                    </div>
+
+                    <!-- Widget 2: PastDue Amount Comparison -->
+                    <div class="bg-surface-container-lowest p-6 rounded-xl border border-outline-variant shadow-sm relative overflow-hidden flex flex-col justify-between min-h-[140px]">
+                        <div class="absolute top-0 right-0 p-4 opacity-5 text-on-background">
+                            <span class="material-symbols-outlined text-[64px]">account_balance_wallet</span>
+                        </div>
+                        <h3 class="font-bold text-xs text-outline uppercase tracking-wider mb-2">Total PastDue Amount</h3>
+                        <div class="flex items-end justify-between mt-auto">
+                            <div>
+                                <p id="kpi-amount-val" class="text-3xl font-bold tracking-tight text-on-surface">LKR 0.00</p>
+                                <p class="text-xs text-outline mt-1">Current Active Arrears</p>
+                            </div>
+                            <div class="text-right">
+                                <div id="kpi-amount-trend" class="flex items-center justify-end font-bold gap-1 text-sm">
+                                    <!-- Dynamic Trend -->
+                                </div>
+                                <p id="kpi-amount-prev" class="text-[10px] text-outline mt-1"></p>
+                            </div>
+                        </div>
+                        <div class="mt-4 w-full bg-surface-container h-1.5 rounded-full overflow-hidden">
+                            <div id="kpi-amount-bar" class="bg-error h-full transition-all duration-500" style="width: 0%"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Critical Rule Alerts (Evaluated dynamically per zone and rule) -->
+                <div id="critical-alert-box" class="bg-on-background text-white p-8 rounded-2xl shadow-xl flex flex-col md:flex-row items-center justify-between gap-8 relative overflow-hidden hidden">
+                    <div class="absolute top-[-20%] left-[-5%] w-64 h-64 bg-primary rounded-full blur-[100px] opacity-20"></div>
+                    <div class="relative z-10 space-y-3">
+                        <div class="flex items-center gap-3">
+                            <span class="bg-primary-container text-on-primary-container px-3 py-1 rounded-full text-[10px] font-bold tracking-wider uppercase">CRITICAL ALERTS</span>
+                            <span id="alert-rule-desc" class="text-outline-variant text-xs font-medium"></span>
+                        </div>
+                        <h2 id="alert-rule-title" class="text-2xl font-bold leading-tight"></h2>
+                        <p class="text-surface-dim text-xs max-w-lg">The dynamic ledger engine has flagged these members as violating specific grace-period installment policies. Immediate collection processes should be initiated.</p>
+                    </div>
+                    <div class="relative z-10 bg-white/10 backdrop-blur-md border border-white/10 p-6 rounded-2xl text-center min-w-[200px]">
+                        <p id="alert-violator-count" class="text-5xl font-extrabold text-primary-container">0</p>
+                        <p class="text-xs font-semibold text-white mt-1">Accounts Flagged</p>
+                        <div class="mt-4 py-1.5 bg-error/30 text-error-container rounded-lg text-[10px] font-bold border border-error/30 tracking-wider">
+                            ACTION REQUIRED
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Status Change Log & Ledger Table -->
+                <div class="bg-surface-container-lowest rounded-xl border border-outline-variant shadow-sm overflow-hidden">
+                    <div class="px-6 py-5 border-b border-outline-variant flex justify-between items-center bg-surface-container-low">
+                        <div>
+                            <h3 class="font-bold text-base text-on-surface">Ledger Status Change Log</h3>
+                            <p class="text-xs text-outline mt-0.5">Chronological trajectory analysis comparing current with previous ledger snapshots.</p>
+                        </div>
+                        <div class="flex items-center gap-2 bg-surface-container-lowest p-1 rounded-lg border border-outline-variant">
+                            <button id="view-mode-all" onclick="changeTableFilter('ALL')" class="px-4 py-1.5 bg-primary text-white rounded-md text-xs font-bold shadow-sm transition-all focus:outline-none">All Changes</button>
+                            <button id="view-mode-new" onclick="changeTableFilter('NEW_PAST_DUE')" class="px-4 py-1.5 text-outline hover:text-on-surface rounded-md text-xs font-semibold transition-all focus:outline-none">New PastDue</button>
+                            <button id="view-mode-cleared" onclick="changeTableFilter('CLEARED')" class="px-4 py-1.5 text-outline hover:text-on-surface rounded-md text-xs font-semibold transition-all focus:outline-none">Cleared</button>
+                        </div>
+                    </div>
+
+                    <!-- Filter Information Bar -->
+                    <div class="px-6 py-3 bg-surface-container/30 border-b border-outline-variant flex items-center justify-between text-xs text-outline">
+                        <div class="flex gap-4">
+                            <span id="count-all" class="font-medium">Total: 0</span>
+                            <span id="count-new" class="font-medium text-rose-700">New PastDue: 0</span>
+                            <span id="count-cleared" class="font-medium text-emerald-700">Cleared: 0</span>
+                            <span id="count-decreased" class="font-medium text-blue-700">Arrears Decreased: 0</span>
+                            <span id="count-increased" class="font-medium text-indigo-700">Arrears Increased: 0</span>
+                        </div>
+                    </div>
+
+                    <!-- Ledger Table -->
+                    <div class="overflow-x-auto custom-scrollbar">
+                        <table class="w-full text-left border-collapse min-w-[900px]">
+                            <thead>
+                                <tr class="bg-surface-container-low border-b border-outline-variant">
+                                    <th class="px-6 py-4 text-xs font-bold text-outline uppercase tracking-wider">Member ID (සාමාජික අංකය)</th>
+                                    <th class="px-6 py-4 text-xs font-bold text-outline uppercase tracking-wider">Customer Name (ගනුදෙනුකරු)</th>
+                                    <th class="px-6 py-4 text-xs font-bold text-outline uppercase tracking-wider">Loan Type (ණය වර්ගය)</th>
+                                    <th class="px-6 py-4 text-xs font-bold text-outline uppercase tracking-wider">Missed Installments (වාරික ගණන)</th>
+                                    <th class="px-6 py-4 text-xs font-bold text-outline uppercase tracking-wider text-right">Balance Change (ශේෂයේ වෙනස)</th>
+                                    <th class="px-6 py-4 text-xs font-bold text-outline uppercase tracking-wider text-center">Status (තත්ත්වය)</th>
+                                </tr>
+                            </thead>
+                            <tbody id="ledger-table-body" class="divide-y divide-outline-variant">
+                                <!-- Rendered dynamically -->
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Table Pagination/Status footer -->
+                    <div class="px-6 py-4 bg-surface-container-low border-t border-outline-variant flex items-center justify-between">
+                        <p id="table-footer-status" class="text-xs text-outline font-medium">Showing 0 entries</p>
+                        <div class="flex items-center gap-1">
+                            <button id="btn-prev-page" class="p-1.5 border border-outline-variant rounded-md text-outline hover:text-primary hover:border-primary disabled:opacity-30 disabled:pointer-events-none transition-colors" onclick="changePage(-1)">
+                                <span class="material-symbols-outlined">chevron_left</span>
+                            </button>
+                            <span id="page-num-indicator" class="text-xs font-bold px-3 py-1 bg-primary text-white rounded">1</span>
+                            <button id="btn-next-page" class="p-1.5 border border-outline-variant rounded-md text-outline hover:text-primary hover:border-primary disabled:opacity-30 disabled:pointer-events-none transition-colors" onclick="changePage(1)">
+                                <span class="material-symbols-outlined">chevron_right</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+        </div>
+
+    </main>
+
+
+
+    <!-- Frontend Interactive Logic Script -->
+    <script>
+        // API Base configuration to support local disk (file://) protocol fallback
+        const API_BASE = window.location.protocol === 'file:' ? 'http://localhost:3000' : '';
+
+        // Global variables
+        let appData = null;
+        let activeTab = 'sync';
+        let selectedZone = 1;
+        let tableFilterMode = 'ALL';
+        let currentPage = 1;
+        const itemsPerPage = 10;
+        let searchFilteredData = [];
+        let paginatedData = [];
+
+        // Tab Switching
+        function switchTab(tabId) {
+            activeTab = tabId;
+            document.getElementById('tab-sync').className = tabId === 'sync' 
+                ? "w-full flex items-center gap-3 px-6 py-4 text-primary border-l-4 border-primary bg-on-secondary-fixed-variant transition-colors cursor-pointer text-left focus:outline-none" 
+                : "w-full flex items-center gap-3 px-6 py-4 text-surface-dim hover:bg-on-secondary-fixed-variant/50 hover:text-white transition-colors cursor-pointer text-left focus:outline-none";
+            
+            document.getElementById('tab-analytics').className = tabId === 'analytics'
+                ? "w-full flex items-center gap-3 px-6 py-4 text-primary border-l-4 border-primary bg-on-secondary-fixed-variant transition-colors cursor-pointer text-left focus:outline-none" 
+                : "w-full flex items-center gap-3 px-6 py-4 text-surface-dim hover:bg-on-secondary-fixed-variant/50 hover:text-white transition-colors cursor-pointer text-left focus:outline-none";
+
+            if (tabId === 'sync') {
+                document.getElementById('view-sync').classList.remove('hidden');
+                document.getElementById('view-analytics').classList.add('hidden');
+            } else {
+                document.getElementById('view-sync').classList.add('hidden');
+                document.getElementById('view-analytics').classList.remove('hidden');
+                // Refresh data if changing to analytics
+                fetchLedgerData();
+            }
+        }
+
+        // Fetch analysis data from API
+        async function fetchLedgerData() {
+            setFloatingStatus('sync', 'Fetching analytics data...');
+            try {
+                const response = await fetch(API_BASE + '/api/data');
+                const result = await response.json();
+                
+                if (result.status === 'success') {
+                    appData = result;
+                    
+                    // Update sync card indicators
+                    updateSyncStatusCard();
+
+                    // Load zones into selector if empty
+                    populateZoneSelector();
+
+                    // Render rules configuration
+                    renderRulesList();
+
+                    // Render analytical widgets
+                    renderAnalytics();
+
+                    setFloatingStatus('check_circle', 'Ledger Synchronized');
+                } else {
+                    console.error('API returned error:', result.message);
+                    setFloatingStatus('error', 'API error: ' + result.message);
+                }
+            } catch (error) {
+                console.error('Failed to fetch data:', error);
+                setFloatingStatus('error', error.message || 'Network error');
+            }
+        }
+
+        function setFloatingStatus(icon, text) {
+            const ind = document.getElementById('header-status-indicator');
+            const pt = document.getElementById('header-status-text');
+            const iconEl = document.getElementById('header-status-icon');
+            const pulse = ind.querySelector('.rounded-full');
+
+            pt.textContent = text;
+            
+            if (icon === 'check_circle') {
+                iconEl.textContent = 'check_circle';
+                iconEl.className = "material-symbols-outlined text-teal-600 text-[14px]";
+                pulse.className = "w-2 h-2 bg-teal-500 rounded-full";
+            } else if (icon === 'error') {
+                iconEl.textContent = 'error';
+                iconEl.className = "material-symbols-outlined text-rose-500 text-[14px]";
+                pulse.className = "w-2 h-2 bg-rose-500 rounded-full animate-pulse";
+            } else {
+                iconEl.textContent = 'sync';
+                iconEl.className = "material-symbols-outlined text-amber-500 animate-spin text-[14px]";
+                pulse.className = "w-2 h-2 bg-amber-500 rounded-full animate-pulse";
+            }
+        }
+
+        function updateSyncStatusCard() {
+            const card = document.getElementById('sync-status-card');
+            const icon = document.getElementById('sync-status-icon');
+            const title = document.getElementById('sync-status-title');
+            const desc = document.getElementById('sync-status-desc');
+
+            if (appData.prevCount > 0 && appData.currCount > 0) {
+                card.className = "bg-teal-50 border border-teal-200 p-4 rounded-xl flex items-center justify-between";
+                icon.textContent = 'verified_user';
+                icon.className = "material-symbols-outlined text-teal-700 text-3xl";
+                title.textContent = "Data Synchronized Successfully";
+                title.className = "font-semibold text-sm text-teal-900";
+                desc.textContent = `Previous Snapshot: ${appData.prevFile} (${appData.prevCount} entries) | Current Snapshot: ${appData.currFile} (${appData.currCount} entries)`;
+            } else {
+                card.className = "bg-rose-50 border border-rose-200 p-4 rounded-xl flex items-center justify-between";
+                icon.textContent = 'error';
+                icon.className = "material-symbols-outlined text-rose-700 text-3xl";
+                title.textContent = "Data Files Missing or Partially Loaded";
+                title.className = "font-semibold text-sm text-rose-900";
+                desc.textContent = "Please upload both previous and current past-due ledger files using the drag-and-drop zones below.";
+            }
+
+            document.getElementById('prev-file-info').textContent = `Loaded File: ${appData.prevFile} (${appData.prevCount} records)`;
+            document.getElementById('curr-file-info').textContent = `Loaded File: ${appData.currFile} (${appData.currCount} records)`;
+        }
+
+        function populateZoneSelector() {
+            const select = document.getElementById('zone-select');
+            const currentSelected = select.value || selectedZone;
+            
+            select.innerHTML = '';
+            
+            appData.zones.forEach(zoneNum => {
+                const opt = document.createElement('option');
+                opt.value = zoneNum;
+                opt.textContent = zoneNum === 0 
+                    ? 'Zone 0 (Unclassified / බල ප්‍රදේශය 0)' 
+                    : `Zone ${zoneNum} (බල ප්‍රදේශය ${zoneNum})`;
+                if (Number(zoneNum) === Number(currentSelected)) {
+                    opt.selected = true;
+                }
+                select.appendChild(opt);
+            });
+            selectedZone = Number(select.value);
+        }
+
+        // Rules configuration management
+        function renderRulesList() {
+            const container = document.getElementById('rules-container');
+            container.innerHTML = '';
+
+            appData.rules.forEach((rule, index) => {
+                const div = document.createElement('div');
+                div.className = "grid grid-cols-1 md:grid-cols-4 gap-4 items-center bg-surface-container-low p-4 rounded-lg border border-outline-variant";
+                div.innerHTML = `
+                    <div class="space-y-1 md:col-span-2">
+                        <label class="block text-[10px] font-bold text-outline uppercase tracking-wider">Loan Type</label>
+                        <select class="w-full bg-white border border-outline-variant rounded-lg px-3 py-2 text-xs font-semibold text-on-surface" onchange="updateRuleType(${index}, this.value)">
+                            ${appData.loanTypes.map(lt => `<option value="${lt}" ${lt === rule.loanType ? 'selected' : ''}>${lt}</option>`).join('')}
+                        </select>
+                    </div>
+                    <div class="space-y-1">
+                        <label class="block text-[10px] font-bold text-outline uppercase tracking-wider">Installments Missed</label>
+                        <div class="flex items-center gap-2">
+                            <span class="text-xs font-bold text-on-surface">></span>
+                            <input type="number" step="1" value="${rule.value}" class="w-full bg-white border border-outline-variant rounded-lg px-3 py-2 text-xs font-bold text-on-surface text-center" onchange="updateRuleValue(${index}, this.value)"/>
+                        </div>
+                    </div>
+                    <div class="flex justify-end pt-4 md:pt-0">
+                        <button onclick="removeRule(${index})" class="p-2 border border-rose-200 text-rose-600 rounded-lg hover:bg-rose-50 transition-colors flex items-center justify-center">
+                            <span class="material-symbols-outlined text-base">delete</span>
+                        </button>
+                    </div>
+                `;
+                container.appendChild(div);
+            });
+
+            if (appData.rules.length === 0) {
+                container.innerHTML = '<p class="text-xs text-outline py-4 text-center">No rules configured. All loaded accounts will be classified as Past Due.</p>';
+            }
+        }
+
+        function updateRuleType(index, val) {
+            appData.rules[index].loanType = val;
+        }
+
+        function updateRuleValue(index, val) {
+            appData.rules[index].value = Number(val);
+        }
+
+        function addRuleRow() {
+            if (!appData || appData.loanTypes.length === 0) return;
+            appData.rules.push({
+                loanType: appData.loanTypes[0],
+                field: 'installments',
+                operator: '>',
+                value: 3
+            });
+            renderRulesList();
+        }
+
+        function removeRule(index) {
+            appData.rules.splice(index, 1);
+            renderRulesList();
+        }
+
+        async function resetRules() {
+            if (!appData) {
+                setFloatingStatus('error', 'No active ledger loaded');
+                return;
+            }
+            appData.rules = [
+                {
+                    loanType: 'Isuru Loan (ඉසුරු ණය)',
+                    field: 'installments',
+                    operator: '>',
+                    value: 3
+                }
+            ];
+            saveRules();
+        }
+
+        async function saveRules() {
+            if (!appData || !appData.rules) {
+                setFloatingStatus('error', 'No active ledger loaded');
+                return;
+            }
+            setFloatingStatus('sync', 'Saving rules and recalculating...');
+            try {
+                const response = await fetch(API_BASE + '/api/rules', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ newRules: appData.rules })
+                });
+                const result = await response.json();
+                if (result.status === 'success') {
+                    fetchLedgerData();
+                } else {
+                    setFloatingStatus('error', 'Save failed: ' + result.message);
+                }
+            } catch (error) {
+                setFloatingStatus('error', 'Network error');
+            }
+        }
+
+        // Zone navigation
+        function changeZone() {
+            const select = document.getElementById('zone-select');
+            selectedZone = Number(select.value);
+            currentPage = 1;
+            renderAnalytics();
+        }
+
+        // Analytics Widget Calculation & Render
+        function renderAnalytics() {
+            if (!appData) return;
+
+            // 1. Filter current violations list & historical changes by selected zone
+            const zoneViolations = appData.violations.filter(r => Number(r.zone) === Number(selectedZone));
+            const zoneChanges = appData.changes.filter(r => Number(r.zone) === Number(selectedZone));
+
+            // Total Members KPI calculation
+            const currentActiveMembers = zoneViolations.length;
+            const prevActiveMembers = appData.prevData.filter(r => Number(r.zone) === Number(selectedZone)).length;
+            
+            document.getElementById('kpi-member-count').textContent = currentActiveMembers.toLocaleString();
+            
+            const memberTrendEl = document.getElementById('kpi-member-trend');
+            const memberPrevEl = document.getElementById('kpi-member-prev');
+            
+            memberPrevEl.textContent = `Vs Previous (${prevActiveMembers.toLocaleString()})`;
+
+            if (prevActiveMembers > 0) {
+                const pct = ((currentActiveMembers - prevActiveMembers) / prevActiveMembers) * 100;
+                const sign = pct >= 0 ? '+' : '';
+                memberTrendEl.textContent = `${sign}${pct.toFixed(1)}%`;
+                if (pct >= 0) {
+                    memberTrendEl.className = "flex items-center justify-end text-error font-bold gap-1 text-sm";
+                    memberTrendEl.innerHTML = `<span class="material-symbols-outlined text-sm">trending_up</span><span>${sign}${pct.toFixed(1)}%</span>`;
+                } else {
+                    memberTrendEl.className = "flex items-center justify-end text-teal-600 font-bold gap-1 text-sm";
+                    memberTrendEl.innerHTML = `<span class="material-symbols-outlined text-sm">trending_down</span><span>${pct.toFixed(1)}%</span>`;
+                }
+            } else {
+                memberTrendEl.innerHTML = `<span class="text-xs text-outline">No Baseline</span>`;
+            }
+            
+            // Progress bar
+            const maxMembers = Math.max(...appData.zones.map(z => appData.violations.filter(r => Number(r.zone) === Number(z)).length));
+            const memberProgress = maxMembers > 0 ? (currentActiveMembers / maxMembers) * 100 : 0;
+            document.getElementById('kpi-member-bar').style.width = `${memberProgress}%`;
+
+            // Total PastDue Amount KPI calculation
+            const currentTotalArrears = zoneViolations.reduce((sum, r) => sum + r.balance, 0);
+            const prevTotalArrears = appData.prevData.filter(r => Number(r.zone) === Number(selectedZone)).reduce((sum, r) => sum + r.balance, 0);
+            
+            document.getElementById('kpi-amount-val').textContent = `LKR ${currentTotalArrears.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+
+            const amountTrendEl = document.getElementById('kpi-amount-trend');
+            const amountPrevEl = document.getElementById('kpi-amount-prev');
+
+            amountPrevEl.textContent = `Vs Prev (LKR ${prevTotalArrears.toLocaleString('en-US', { maximumFractionDigits: 0 })})`;
+
+            if (prevTotalArrears > 0) {
+                const pct = ((currentTotalArrears - prevTotalArrears) / prevTotalArrears) * 100;
+                const sign = pct >= 0 ? '+' : '';
+                if (pct >= 0) {
+                    amountTrendEl.className = "flex items-center justify-end text-error font-bold gap-1 text-sm";
+                    amountTrendEl.innerHTML = `<span class="material-symbols-outlined text-sm">trending_up</span><span>${sign}${pct.toFixed(1)}%</span>`;
+                } else {
+                    amountTrendEl.className = "flex items-center justify-end text-teal-600 font-bold gap-1 text-sm";
+                    amountTrendEl.innerHTML = `<span class="material-symbols-outlined text-sm">trending_down</span><span>${pct.toFixed(1)}%</span>`;
+                }
+            } else {
+                amountTrendEl.innerHTML = `<span class="text-xs text-outline">No Baseline</span>`;
+            }
+
+            const maxAmount = Math.max(...appData.zones.map(z => appData.violations.filter(r => Number(r.zone) === Number(z)).reduce((sum, r) => sum + r.balance, 0)));
+            const amountProgress = maxAmount > 0 ? (currentTotalArrears / maxAmount) * 100 : 0;
+            document.getElementById('kpi-amount-bar').style.width = `${amountProgress}%`;
+
+            // 2. Critical Rules Alert evaluation
+            // Look for rule violators in the current zone
+            const violators = zoneViolations.filter(r => r.isPastDueViolation);
+            const alertBox = document.getElementById('critical-alert-box');
+
+            if (violators.length > 0 && appData.rules.length > 0) {
+                alertBox.classList.remove('hidden');
+                document.getElementById('alert-violator-count').textContent = violators.length;
+                
+                // Get details of the active rules
+                const rule = appData.rules[0]; // Highlight first configured rule as critical example
+                document.getElementById('alert-rule-desc').textContent = `Rule: Installments ${rule.operator} ${rule.value}`;
+                document.getElementById('alert-rule-title').innerHTML = `${rule.loanType.split('(')[0].trim()} Portfolio <br/><span class="text-primary-container">Overdue Threshold Exceeded</span>`;
+            } else {
+                alertBox.classList.add('hidden');
+            }
+
+            // Update status counts on changes
+            const nChanges = zoneChanges.filter(c => c.type === 'NEW_PAST_DUE').length;
+            const cChanges = zoneChanges.filter(c => c.type === 'CLEARED').length;
+            const dChanges = zoneChanges.filter(c => c.type === 'AMOUNT_DECREASED').length;
+            const iChanges = zoneChanges.filter(c => c.type === 'AMOUNT_INCREASED').length;
+
+            document.getElementById('count-all').textContent = `Total: ${zoneChanges.length}`;
+            document.getElementById('count-new').textContent = `New PastDue: ${nChanges}`;
+            document.getElementById('count-cleared').textContent = `Cleared: ${cChanges}`;
+            document.getElementById('count-decreased').textContent = `Decreased: ${dChanges}`;
+            document.getElementById('count-increased').textContent = `Increased: ${iChanges}`;
+
+            // Store active data for filtering and table rendering
+            applyFilters();
+        }
+
+        // Table filters
+        function changeTableFilter(mode) {
+            tableFilterMode = mode;
+            currentPage = 1;
+            
+            const btnAll = document.getElementById('view-mode-all');
+            const btnNew = document.getElementById('view-mode-new');
+            const btnCleared = document.getElementById('view-mode-cleared');
+
+            btnAll.className = mode === 'ALL' ? "px-4 py-1.5 bg-primary text-white rounded-md text-xs font-bold shadow-sm transition-all focus:outline-none" : "px-4 py-1.5 text-outline hover:text-on-surface rounded-md text-xs font-semibold transition-all focus:outline-none";
+            btnNew.className = mode === 'NEW_PAST_DUE' ? "px-4 py-1.5 bg-primary text-white rounded-md text-xs font-bold shadow-sm transition-all focus:outline-none" : "px-4 py-1.5 text-outline hover:text-on-surface rounded-md text-xs font-semibold transition-all focus:outline-none";
+            btnCleared.className = mode === 'CLEARED' ? "px-4 py-1.5 bg-primary text-white rounded-md text-xs font-bold shadow-sm transition-all focus:outline-none" : "px-4 py-1.5 text-outline hover:text-on-surface rounded-md text-xs font-semibold transition-all focus:outline-none";
+
+            applyFilters();
+        }
+
+        function applyFilters() {
+            if (!appData) return;
+
+            const searchQuery = document.getElementById('search-input').value.toLowerCase().trim();
+            const zoneChanges = appData.changes.filter(r => Number(r.zone) === Number(selectedZone));
+
+            let data = zoneChanges;
+
+            // Apply status toggle filter
+            if (tableFilterMode === 'NEW_PAST_DUE') {
+                data = data.filter(c => c.type === 'NEW_PAST_DUE');
+            } else if (tableFilterMode === 'CLEARED') {
+                data = data.filter(c => c.type === 'CLEARED');
+            }
+
+            // Apply search filter
+            if (searchQuery) {
+                data = data.filter(c => 
+                    c.memberId.toLowerCase().includes(searchQuery) ||
+                    c.name.toLowerCase().includes(searchQuery) ||
+                    c.loanType.toLowerCase().includes(searchQuery)
+                );
+            }
+
+            searchFilteredData = data;
+            renderTable();
+        }
+
+        // Render Ledger changes table
+        function renderTable() {
+            const tbody = document.getElementById('ledger-table-body');
+            tbody.innerHTML = '';
+
+            const totalItems = searchFilteredData.length;
+            const totalPages = Math.ceil(totalItems / itemsPerPage) || 1;
+
+            if (currentPage > totalPages) currentPage = totalPages;
+            if (currentPage < 1) currentPage = 1;
+
+            document.getElementById('btn-prev-page').disabled = currentPage === 1;
+            document.getElementById('btn-next-page').disabled = currentPage === totalPages;
+            document.getElementById('page-num-indicator').textContent = currentPage;
+
+            const startIdx = (currentPage - 1) * itemsPerPage;
+            const endIdx = Math.min(startIdx + itemsPerPage, totalItems);
+            
+            paginatedData = searchFilteredData.slice(startIdx, endIdx);
+
+            document.getElementById('table-footer-status').textContent = totalItems > 0 
+                ? `Showing ${startIdx + 1} to ${endIdx} of ${totalItems} entries` 
+                : 'Showing 0 to 0 of 0 entries';
+
+            if (paginatedData.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="6" class="px-6 py-8 text-center text-xs text-outline">
+                            No ledger changes match your current filters.
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            paginatedData.forEach(row => {
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-surface-container-low transition-colors cursor-pointer border-b border-outline-variant";
+                tr.onclick = () => tr.classList.toggle('bg-primary/5');
+
+                // Determine installments display (highlight if violating rule)
+                // Find if there is a violation for this member & type in current violations
+                const matchedViolator = appData.violations.find(v => v.memberId === row.memberId && v.loanType === row.loanType);
+                let instDisplay = row.currInstallments.toFixed(2);
+                if (matchedViolator && matchedViolator.isPastDueViolation) {
+                    instDisplay = `<span class="text-error font-bold">${row.currInstallments.toFixed(2)}</span> <span class="text-[10px] text-error bg-error-container/40 px-1.5 py-0.5 rounded-full ml-1 font-bold">Rule Flagged</span>`;
+                }
+
+                // Balance change formatting
+                let balChangeCell = '';
+                const absChange = Math.abs(row.balanceChange).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                if (row.balanceChange > 0) {
+                    balChangeCell = `<td class="px-6 py-4 font-mono text-right text-indigo-700 font-semibold">+LKR ${absChange}</td>`;
+                } else if (row.balanceChange < 0) {
+                    balChangeCell = `<td class="px-6 py-4 font-mono text-right text-emerald-700 font-semibold">-LKR ${absChange}</td>`;
+                } else {
+                    balChangeCell = `<td class="px-6 py-4 font-mono text-right text-on-surface-variant font-medium">LKR 0.00</td>`;
+                }
+
+                // Status pill formatting
+                let statusPill = '';
+                if (row.type === 'NEW_PAST_DUE') {
+                    statusPill = `<span class="inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-bold bg-rose-100 text-rose-800 uppercase tracking-wider shadow-sm">New PastDue</span>`;
+                } else if (row.type === 'CLEARED') {
+                    statusPill = `<span class="inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800 uppercase tracking-wider shadow-sm">Cleared</span>`;
+                } else if (row.type === 'AMOUNT_INCREASED') {
+                    statusPill = `<span class="inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-bold bg-indigo-100 text-indigo-800 uppercase tracking-wider shadow-sm">Arrears Increased</span>`;
+                } else if (row.type === 'AMOUNT_DECREASED') {
+                    statusPill = `<span class="inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-bold bg-blue-100 text-blue-800 uppercase tracking-wider shadow-sm">Arrears Decreased</span>`;
+                } else {
+                    statusPill = `<span class="inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-bold bg-slate-100 text-slate-800 uppercase tracking-wider shadow-sm">No Change</span>`;
+                }
+
+                tr.innerHTML = `
+                    <td class="px-6 py-4 font-mono text-xs text-on-surface font-semibold">${row.memberId}</td>
+                    <td class="px-6 py-4 text-xs font-semibold text-on-surface">${row.name}</td>
+                    <td class="px-6 py-4 text-xs text-outline font-medium">${row.loanType}</td>
+                    <td class="px-6 py-4 text-xs text-on-surface font-medium">${instDisplay}</td>
+                    ${balChangeCell}
+                    <td class="px-6 py-4 text-center">${statusPill}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function changePage(direction) {
+            currentPage += direction;
+            renderTable();
+        }
+
+        // Export Report to CSV file
+        function downloadReport() {
+            if (!searchFilteredData || searchFilteredData.length === 0) return;
+
+            let csvContent = "data:text/csv;charset=utf-8,";
+            csvContent += "Member ID,Customer Name,Loan Type,Missed Installments,Previous Balance,Current Balance,Balance Change,Status\n";
+
+            searchFilteredData.forEach(row => {
+                const nameEscaped = row.name.replace(/"/g, '""');
+                csvContent += `"${row.memberId}","${nameEscaped}","${row.loanType}",${row.currInstallments},${row.prevBalance},${row.currBalance},${row.balanceChange},"${row.type}"\n`;
+            });
+
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", `PastDue_Ledger_Zone_${selectedZone}_Report.csv`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        // Setup Drag & Drop File upload interactions
+        function configureDragAndDrop(zoneId, fileInputId, uploadKey) {
+            const zone = document.getElementById(zoneId);
+            const input = document.getElementById(fileInputId);
+            
+            zone.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                zone.classList.add('drag-zone-active', 'scale-[1.01]');
+            });
+
+            zone.addEventListener('dragleave', () => {
+                zone.classList.remove('drag-zone-active', 'scale-[1.01]');
+            });
+
+            zone.addEventListener('drop', (e) => {
+                e.preventDefault();
+                zone.classList.remove('drag-zone-active', 'scale-[1.01]');
+                const files = e.dataTransfer.files;
+                if (files.length > 0) {
+                    handleUpload(files[0], uploadKey, zone);
+                }
+            });
+
+            zone.addEventListener('click', () => {
+                input.click();
+            });
+
+            input.addEventListener('change', (e) => {
+                const file = e.target.files[0];
+                if (file) {
+                    handleUpload(file, uploadKey, zone);
+                }
+            });
+        }
+
+        async function handleUpload(file, uploadKey, zoneEl) {
+            const statusText = zoneEl.querySelector('p');
+            const icon = zoneEl.querySelector('.material-symbols-outlined');
+
+            statusText.textContent = `Uploading ${file.name}...`;
+            statusText.className = "text-xs text-primary font-bold animate-pulse";
+            icon.textContent = "sync";
+            icon.className = "material-symbols-outlined text-4xl text-primary mb-3 animate-spin";
+
+            const formData = new FormData();
+            formData.append(uploadKey, file);
+
+            try {
+                const response = await fetch(API_BASE + '/api/upload', {
+                    method: 'POST',
+                    body: formData
+                });
+                const result = await response.json();
+                
+                if (result.status === 'success') {
+                    statusText.textContent = `File Synchronized: ${file.name}`;
+                    statusText.className = "text-xs text-primary font-bold mt-2";
+                    icon.textContent = "check_circle";
+                    icon.className = "material-symbols-outlined text-4xl text-primary mb-3";
+                    
+                    // Reload data
+                    fetchLedgerData();
+                } else {
+                    statusText.textContent = `Upload failed: ${result.message}`;
+                    statusText.className = "text-xs text-rose-600 font-bold mt-2";
+                    icon.textContent = "error";
+                    icon.className = "material-symbols-outlined text-4xl text-rose-500 mb-3";
+                }
+            } catch (error) {
+                statusText.textContent = "Upload failed. Server error.";
+                statusText.className = "text-xs text-rose-600 font-bold mt-2";
+                icon.textContent = "error";
+                icon.className = "material-symbols-outlined text-4xl text-rose-500 mb-3";
+            }
+        }
+
+        // Initialize application on load
+        window.addEventListener('DOMContentLoaded', () => {
+            fetchLedgerData();
+            configureDragAndDrop('dropzone-prev', 'file-input-prev', 'prevFile');
+            configureDragAndDrop('dropzone-curr', 'file-input-curr', 'currFile');
+        });
+    </script>
+</body>
+</html>

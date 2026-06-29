@@ -1,0 +1,5 @@
+node_modules/
+uploads/*
+!uploads/.gitkeep
+.system_generated/
+*.log

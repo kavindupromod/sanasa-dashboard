@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Data Synchronization | PastDue Ledger</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "tertiary-fixed-dim": "#adc6ff",
+                        "outline-variant": "#bbcac6",
+                        "surface-container": "#e5eeff",
+                        "on-background": "#0b1c30",
+                        "outline": "#6c7a77",
+                        "error": "#ba1a1a",
+                        "on-tertiary": "#ffffff",
+                        "on-secondary": "#ffffff",
+                        "on-tertiary-container": "#00377d",
+                        "on-error": "#ffffff",
+                        "primary-container": "#14b8a6",
+                        "on-secondary-fixed-variant": "#37466b",
+                        "surface-dim": "#cbdbf5",
+                        "on-secondary-container": "#4a597f",
+                        "inverse-surface": "#213145",
+                        "on-primary-container": "#00423b",
+                        "on-secondary-fixed": "#081a3d",
+                        "primary-fixed-dim": "#4fdbc8",
+                        "surface-variant": "#d3e4fe",
+                        "secondary-fixed-dim": "#b6c6f1",
+                        "background": "#f8f9ff",
+                        "tertiary-fixed": "#d8e2ff",
+                        "surface": "#f8f9ff",
+                        "surface-container-high": "#dce9ff",
+                        "secondary-container": "#c1d1fd",
+                        "surface-container-low": "#eff4ff",
+                        "surface-container-lowest": "#ffffff",
+                        "primary-fixed": "#71f8e4",
+                        "tertiary-container": "#75a3ff",
+                        "secondary": "#4e5e84",
+                        "on-primary-fixed": "#00201c",
+                        "surface-tint": "#006b5f",
+                        "inverse-on-surface": "#eaf1ff",
+                        "on-primary-fixed-variant": "#005048",
+                        "tertiary": "#005ac2",
+                        "inverse-primary": "#4fdbc8",
+                        "on-surface-variant": "#3c4947",
+                        "secondary-fixed": "#d9e2ff",
+                        "on-surface": "#0b1c30",
+                        "surface-container-highest": "#d3e4fe",
+                        "on-tertiary-fixed": "#001a42",
+                        "primary": "#006b5f",
+                        "on-error-container": "#93000a",
+                        "on-tertiary-fixed-variant": "#004395",
+                        "surface-bright": "#f8f9ff",
+                        "error-container": "#ffdad6",
+                        "on-primary": "#ffffff"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "spacing": {
+                        "stack-sm": "0.5rem",
+                        "stack-md": "1rem",
+                        "container-max-width": "1440px",
+                        "stack-lg": "1.5rem",
+                        "section-padding": "2rem",
+                        "sidebar-width": "260px",
+                        "gutter": "1.5rem"
+                    },
+                    "fontFamily": {
+                        "headline-lg": ["Inter"],
+                        "mono-data": ["Inter"],
+                        "headline-md": ["Inter"],
+                        "headline-lg-mobile": ["Inter"],
+                        "display-lg": ["Inter"],
+                        "body-lg": ["Inter"],
+                        "body-md": ["Inter"],
+                        "label-md": ["Inter"]
+                    },
+                    "fontSize": {
+                        "headline-lg": ["24px", {"lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                        "mono-data": ["14px", {"lineHeight": "20px", "fontWeight": "500"}],
+                        "headline-md": ["20px", {"lineHeight": "28px", "fontWeight": "600"}],
+                        "headline-lg-mobile": ["20px", {"lineHeight": "28px", "fontWeight": "600"}],
+                        "display-lg": ["36px", {"lineHeight": "44px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                        "body-lg": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                        "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                        "label-md": ["12px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "600"}]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        body { font-family: 'Inter', sans-serif; }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            vertical-align: middle;
+        }
+        .drag-zone-active {
+            border-color: #3B82F6;
+            background-color: rgba(59, 130, 246, 0.05);
+        }
+        .custom-shadow {
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+    </style>
+</head>
+<body class="bg-background text-on-background min-h-screen flex overflow-hidden">
+<!-- SideNavBar (Authority: JSON) -->
+<aside class="fixed left-0 top-0 h-full w-[260px] bg-on-secondary-fixed flex flex-col py-stack-lg shadow-sm z-50">
+<div class="px-6 mb-10">
+<h1 class="font-headline-md text-headline-md font-bold text-surface-container-lowest">PastDue Ledger</h1>
+<p class="text-surface-variant font-body-md text-[12px] opacity-70">Financial Controller</p>
+</div>
+<nav class="flex-1 space-y-1">
+<!-- Dashboard -->
+<a class="flex items-center gap-3 px-6 py-3 text-surface-variant hover:bg-on-secondary-fixed-variant hover:text-primary-fixed-dim transition-colors cursor-pointer active:opacity-80" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+<span class="font-body-md text-body-md">Dashboard</span>
+</a>
+<!-- Data Upload (ACTIVE) -->
+<a class="flex items-center gap-3 px-6 py-3 text-primary-fixed border-l-4 border-primary bg-on-secondary-fixed-variant transition-colors cursor-pointer active:opacity-80" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">cloud_upload</span>
+<span class="font-body-md text-body-md">Data Upload</span>
+</a>
+<!-- Zone Analytics -->
+<a class="flex items-center gap-3 px-6 py-3 text-surface-variant hover:bg-on-secondary-fixed-variant hover:text-primary-fixed-dim transition-colors cursor-pointer active:opacity-80" href="#">
+<span class="material-symbols-outlined">analytics</span>
+<span class="font-body-md text-body-md">Zone Analytics</span>
+</a>
+<!-- Reports -->
+<a class="flex items-center gap-3 px-6 py-3 text-surface-variant hover:bg-on-secondary-fixed-variant hover:text-primary-fixed-dim transition-colors cursor-pointer active:opacity-80" href="#">
+<span class="material-symbols-outlined">assessment</span>
+<span class="font-body-md text-body-md">Reports</span>
+</a>
+</nav>
+<div class="px-6 mt-auto">
+<div class="flex items-center gap-3 p-3 rounded-lg bg-on-secondary-fixed-variant/30">
+<div class="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-white font-bold">JD</div>
+<div class="overflow-hidden">
+<p class="text-white font-body-md truncate">John Doe</p>
+<p class="text-surface-variant text-[11px] truncate">Admin Access</p>
+</div>
+</div>
+</div>
+</aside>
+<!-- Main Content Area -->
+<main class="ml-[260px] w-[calc(100%-260px)] flex flex-col h-screen overflow-y-auto">
+<!-- TopNavBar (Authority: JSON) -->
+<header class="flex justify-between items-center h-16 px-gutter border-b border-outline-variant bg-surface-container-lowest sticky top-0 z-40">
+<div class="flex items-center gap-4 flex-1">
+<div class="relative w-full max-w-md focus-within:ring-2 focus-within:ring-primary rounded-lg">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant">search</span>
+<input class="w-full pl-10 pr-4 py-2 bg-surface-container-low border-none rounded-lg text-body-md focus:ring-0" placeholder="Search ledger files..." type="text"/>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<button class="p-2 text-on-surface-variant hover:text-primary transition-colors">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<button class="p-2 text-on-surface-variant hover:text-primary transition-colors">
+<span class="material-symbols-outlined">settings</span>
+</button>
+<div class="h-8 w-[1px] bg-outline-variant mx-2"></div>
+<button class="flex items-center gap-2 text-on-surface-variant hover:text-primary transition-colors">
+<span class="material-symbols-outlined">account_circle</span>
+</button>
+</div>
+</header>
+<!-- Page Content -->
+<div class="p-section-padding max-w-container-max-width mx-auto w-full space-y-stack-lg">
+<!-- Header Section -->
+<div class="flex flex-col gap-1">
+<h2 class="font-headline-lg text-headline-lg text-on-background">Data Synchronization &amp; Comparison</h2>
+<p class="font-body-md text-body-md text-on-surface-variant">Sync and compare ledger snapshots to identify changes in debt recovery and account statuses.</p>
+</div>
+<!-- Section 1: Upload Cards -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-gutter">
+<!-- Card A -->
+<div class="bg-surface-container-lowest rounded-xl border border-outline-variant p-6 custom-shadow flex flex-col gap-4">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-lg bg-surface-container flex items-center justify-center text-primary">
+<span class="material-symbols-outlined">history</span>
+</div>
+<h3 class="font-headline-md text-headline-md text-on-background text-base">Upload Previous PastDue File (eg: 05.06)</h3>
+</div>
+<div class="flex-1 border-2 border-dashed border-outline-variant rounded-xl flex flex-col items-center justify-center py-12 px-6 bg-surface-container-low hover:border-primary transition-all group cursor-pointer" id="dropzone-a">
+<span class="material-symbols-outlined text-4xl text-outline mb-4 group-hover:text-primary transition-colors">cloud_upload</span>
+<p class="font-body-md text-body-md text-on-surface-variant mb-4 text-center">Drag and drop your historical CSV or XLSX file here</p>
+<button class="px-6 py-2 border border-secondary text-secondary rounded-lg font-body-md hover:bg-secondary-container transition-colors">
+                            Browse Files
+                        </button>
+</div>
+</div>
+<!-- Card B -->
+<div class="bg-surface-container-lowest rounded-xl border border-outline-variant p-6 custom-shadow flex flex-col gap-4">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-lg bg-primary-container/20 flex items-center justify-center text-primary">
+<span class="material-symbols-outlined">update</span>
+</div>
+<h3 class="font-headline-md text-headline-md text-on-background text-base">Upload Current PastDue File (eg: 06.11)</h3>
+</div>
+<div class="flex-1 border-2 border-dashed border-outline-variant rounded-xl flex flex-col items-center justify-center py-12 px-6 bg-surface-container-low hover:border-primary transition-all group cursor-pointer" id="dropzone-b">
+<span class="material-symbols-outlined text-4xl text-outline mb-4 group-hover:text-primary transition-colors">cloud_upload</span>
+<p class="font-body-md text-body-md text-on-surface-variant mb-4 text-center">Drag and drop your latest current snapshot file here</p>
+<button class="px-6 py-2 border border-secondary text-secondary rounded-lg font-body-md hover:bg-secondary-container transition-colors">
+                            Browse Files
+                        </button>
+</div>
+</div>
+</div>
+<!-- Section 2: Configuration Row -->
+<div class="bg-surface-container-lowest rounded-xl border border-outline-variant p-gutter custom-shadow">
+<div class="grid grid-cols-1 md:grid-cols-2 gap-gutter">
+<div class="space-y-2">
+<label class="font-label-md text-label-md text-outline uppercase tracking-wider">Select Loan Type</label>
+<div class="relative">
+<select class="w-full bg-surface-bright border border-outline-variant rounded-lg px-4 py-3 font-body-md text-on-surface appearance-none focus:ring-2 focus:ring-primary focus:border-primary outline-none">
+<option>Isuru</option>
+<option>Biqre Kh</option>
+<option>Business Loan</option>
+</select>
+<span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-on-surface-variant">expand_more</span>
+</div>
+</div>
+<div class="space-y-2">
+<label class="font-label-md text-label-md text-outline uppercase tracking-wider">Comparison Date</label>
+<div class="relative">
+<input class="w-full bg-surface-bright border border-outline-variant rounded-lg px-4 py-3 font-body-md text-on-surface focus:ring-2 focus:ring-primary focus:border-primary outline-none" type="date"/>
+<span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-on-surface-variant">calendar_today</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Action Button -->
+<div class="flex justify-center pt-4">
+<button class="bg-primary-container hover:bg-on-primary-container transition-all text-on-primary-container px-12 py-4 rounded-xl font-headline-md text-headline-md flex items-center gap-3 shadow-lg hover:shadow-xl active:scale-[0.98]">
+<span class="material-symbols-outlined">compare_arrows</span>
+                    Compare &amp; Analyze
+                </button>
+</div>
+<!-- Contextual Illustration/Hint -->
+<div class="mt-8 grid grid-cols-1 md:grid-cols-3 gap-gutter opacity-60 grayscale hover:grayscale-0 transition-all duration-500">
+<div class="bg-surface-container-low p-4 rounded-lg flex items-start gap-3">
+<span class="material-symbols-outlined text-primary">verified_user</span>
+<div>
+<p class="font-label-md text-on-surface">Data Integrity</p>
+<p class="text-[11px] font-body-md">Validation engine checks for structural consistency before sync.</p>
+</div>
+</div>
+<div class="bg-surface-container-low p-4 rounded-lg flex items-start gap-3">
+<span class="material-symbols-outlined text-primary">analytics</span>
+<div>
+<p class="font-label-md text-on-surface">Delta Discovery</p>
+<p class="text-[11px] font-body-md">Detecting new arrears, closures, and status transitions instantly.</p>
+</div>
+</div>
+<div class="bg-surface-container-low p-4 rounded-lg flex items-start gap-3">
+<span class="material-symbols-outlined text-primary">security</span>
+<div>
+<p class="font-label-md text-on-surface">Audit Logged</p>
+<p class="text-[11px] font-body-md">All data uploads are timestamped and linked to your controller ID.</p>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- Micro-interaction JS -->
+<script>
+        document.querySelectorAll('[id^="dropzone-"]').forEach(zone => {
+            zone.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                zone.classList.add('drag-zone-active');
+                zone.classList.add('scale-[1.02]');
+            });
+
+            zone.addEventListener('dragleave', () => {
+                zone.classList.remove('drag-zone-active');
+                zone.classList.remove('scale-[1.02]');
+            });
+
+            zone.addEventListener('drop', (e) => {
+                e.preventDefault();
+                zone.classList.remove('drag-zone-active');
+                zone.classList.remove('scale-[1.02]');
+                const files = e.dataTransfer.files;
+                if (files.length > 0) {
+                    const statusText = zone.querySelector('p');
+                    statusText.textContent = `File ready: ${files[0].name}`;
+                    statusText.classList.add('text-primary', 'font-bold');
+                    zone.querySelector('.material-symbols-outlined').textContent = 'check_circle';
+                    zone.querySelector('.material-symbols-outlined').classList.add('text-primary');
+                }
+            });
+
+            zone.addEventListener('click', () => {
+                const input = document.createElement('input');
+                input.type = 'file';
+                input.accept = '.csv,.xlsx,.xls';
+                input.onchange = (e) => {
+                    const file = e.target.files[0];
+                    if (file) {
+                        const statusText = zone.querySelector('p');
+                        statusText.textContent = `File ready: ${file.name}`;
+                        statusText.classList.add('text-primary', 'font-bold');
+                        zone.querySelector('.material-symbols-outlined').textContent = 'check_circle';
+                        zone.querySelector('.material-symbols-outlined').classList.add('text-primary');
+                    }
+                };
+                input.click();
+            });
+        });
+    </script>
+</body></html>
